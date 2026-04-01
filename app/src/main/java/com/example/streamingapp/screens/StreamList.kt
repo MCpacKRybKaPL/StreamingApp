@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -19,10 +20,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.streamingapp.ui.theme.Orange
 
 @Composable
 fun StreamList(navController: NavController){
@@ -46,7 +49,12 @@ fun StreamList(navController: NavController){
 @Composable
 
 fun StreamPreview(preview: String, proile: String, title: String, streamerName: String){
-    Card(modifier = Modifier.fillMaxSize().padding(10.dp)) {
+    Card(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(10.dp),
+        shape = RoundedCornerShape(10.dp)
+    ) {
         Column {
             AsyncImage(
                 model = preview,
@@ -54,23 +62,30 @@ fun StreamPreview(preview: String, proile: String, title: String, streamerName: 
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier.fillMaxWidth()
             )
-            Row(
-                modifier = Modifier.padding(10.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier.padding(10.dp)
             ) {
-                AsyncImage(
-                    model = proile,
-                    contentDescription = "",
-                    modifier = Modifier.clip(CircleShape).size(30.dp)
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Column {
-                    Text(title,
-                        fontSize = 16.sp
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AsyncImage(
+                        model = proile,
+                        contentDescription = "",
+                        modifier = Modifier.clip(CircleShape).size(30.dp)
                     )
+                    Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        streamerName,
-                        fontSize = 12.sp
+                        text = title,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                Row {
+                    Spacer(modifier = Modifier.width(40.dp))
+                    Text(
+                        text = streamerName,
+                        fontSize = 12.sp,
+                        color = Orange
                     )
                 }
             }
