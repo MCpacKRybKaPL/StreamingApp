@@ -12,7 +12,12 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,17 +35,29 @@ import com.example.streamingapp.ui.theme.Orange
 @Composable
 fun StreamList(navController: NavController){
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+        Column(
             modifier = Modifier.padding(innerPadding)
         ) {
-            items(30) {
+            Row{
+                IconButton(onClick = {
+                    navController.navigate(route = "LoginRegister")
+                }) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "")
+                }
+            }
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2)
+            ) {
+                items(30) {
                     StreamPreview(
                         preview = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYOua5-UzBDdi0zfoKP4LyrqxcpHIN4u2rsw&s",
                         proile = "https://freerangestock.com/sample/120147/business-man-profile-vector.jpg",
                         title = "Zagrajmy w Minecraft",
                         streamerName = "JJjoker"
                     )
+                }
             }
         }
     }
