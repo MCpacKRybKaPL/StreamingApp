@@ -1,5 +1,6 @@
 package com.example.streamingapp.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,7 +15,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.streamingapp.ui.theme.Orange
+import kotlin.random.Random
 
 @Composable
 fun StreamList(navController: NavController){
@@ -55,7 +56,9 @@ fun StreamList(navController: NavController){
                         preview = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYOua5-UzBDdi0zfoKP4LyrqxcpHIN4u2rsw&s",
                         proile = "https://freerangestock.com/sample/120147/business-man-profile-vector.jpg",
                         title = "Zagrajmy w Minecraft",
-                        streamerName = "JJjoker"
+                        streamerName = "JJjoker",
+                        streamID = Random.nextInt(1, 100),
+                        navController = navController
                     )
                 }
             }
@@ -65,11 +68,14 @@ fun StreamList(navController: NavController){
 
 @Composable
 
-fun StreamPreview(preview: String, proile: String, title: String, streamerName: String){
+fun StreamPreview(preview: String, proile: String, title: String, streamerName: String, streamID: Int, navController: NavController){
     Card(
         modifier = Modifier
             .fillMaxSize()
-            .padding(10.dp),
+            .padding(10.dp)
+            .clickable( onClick = {
+                navController.navigate("StreamView/$streamID")
+            } ),
         shape = RoundedCornerShape(10.dp)
     ) {
         Column {
