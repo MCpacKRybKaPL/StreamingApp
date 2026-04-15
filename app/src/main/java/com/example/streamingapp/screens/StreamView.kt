@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -58,7 +61,9 @@ fun StreamView(streamID: String, navController: NavController){
             )
         },
         content = { innerPadding ->
-            Column(modifier = Modifier.padding(innerPadding)) {
+            Column(modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding)) {
                 AsyncImage(
                     model = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYOua5-UzBDdi0zfoKP4LyrqxcpHIN4u2rsw&s",
                     contentDescription = "",
@@ -67,14 +72,19 @@ fun StreamView(streamID: String, navController: NavController){
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 LazyColumn(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
                 ) {
                     items(30){
                         MessageView(Message("asd", "kerhsdvbckhsgvdckbh"))
                     }
                 }
                 Spacer(modifier = Modifier.height(5.dp))
-                MessageInput()
+                MessageInput(modifier = Modifier
+                                        .fillMaxWidth()
+                                        .imePadding()
+                                        .navigationBarsPadding())
             }
         }
     )
@@ -93,11 +103,10 @@ fun MessageView(message: Message){
 }
 
 @Composable
-fun MessageInput(){
+fun MessageInput(modifier: Modifier = Modifier){
     var message by remember { mutableStateOf("") }
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .height(IntrinsicSize.Min)
     ) {
         OutlinedTextField(
