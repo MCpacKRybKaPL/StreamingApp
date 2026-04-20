@@ -1,7 +1,7 @@
 package com.example.streamingapp.network
 
 import com.example.streamingapp.BuildConfig
-import com.example.streamingapp.auth.api.AuthApi
+import com.example.streamingapp.network.backend.AuthApi
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import kotlin.getValue

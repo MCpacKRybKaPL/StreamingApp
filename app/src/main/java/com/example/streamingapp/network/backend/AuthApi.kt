@@ -1,15 +1,17 @@
-package com.example.streamingapp.auth.api
+package com.example.streamingapp.network.backend
 
 import com.example.streamingapp.dataModels.request.AuthenticationRequest
 import com.example.streamingapp.dataModels.request.RefreshTokenRequest
 import com.example.streamingapp.dataModels.request.RegisterRequest
 import com.example.streamingapp.dataModels.response.AuthenticationResponse
 import com.example.streamingapp.dataModels.response.RefreshTokenResponse
+
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface AuthApi {
+
     @POST("api/auth/register")
     suspend fun register(@Body request: RegisterRequest): Response<AuthenticationResponse>
 
