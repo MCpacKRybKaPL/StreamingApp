@@ -74,7 +74,10 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("StreamList") {
-                        StreamList(navController)
+                        StreamList(
+                            navController = navController,
+                            authViewModel = authViewModel
+                        )
                     }
 
                     composable(

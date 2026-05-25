@@ -114,7 +114,6 @@ fun LoginScreen(
                         isLoading = isLoading,
                         onRegister = { username, password, repeatPassword, inviteCode ->
                             if (password != repeatPassword) {
-                                // Najlepiej obsłużyć to w ViewModelu, ale na szybko może być tutaj
                                 return@RegisterForm
                             }
 

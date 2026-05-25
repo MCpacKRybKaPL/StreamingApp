@@ -49,11 +49,11 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
-    fun logout() {
+    fun logout(onLoggedOut: () -> Unit = {}) {
         viewModelScope.launch {
             repository.logout()
-
             isLoggedIn = false
+            onLoggedOut()
         }
     }
 
