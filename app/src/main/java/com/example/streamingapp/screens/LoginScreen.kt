@@ -28,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,52 +40,100 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.streamingapp.ui.theme.PitchBlack
+import com.example.streamingapp.viewmodel.AuthViewModel
 
 @Composable
-fun LoginScreen(onLogin: () -> Unit, onRegister: () -> Unit){
+fun LoginScreen(
+    viewModel: AuthViewModel,
+    onLoginSuccess: () -> Unit
+) {
+    val isLoading = viewModel.isLoading
+    val errorMessage = viewModel.errorMessage
+    val isLoggedIn = viewModel.isLoggedIn
+
+    LaunchedEffect(isLoggedIn) {
+        if (isLoggedIn) {
+            onLoginSuccess()
+        }
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = PitchBlack
     ) { innerPadding ->
+
         Column(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
+        ) {
             var loginRegister by remember { mutableStateOf(false) }
+
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Log In")
                 Switch(
                     checked = loginRegister,
-                    onCheckedChange = {loginRegister = it},
+                    onCheckedChange = { loginRegister = it },
                     modifier = Modifier.padding(5.dp)
                 )
                 Text("Register")
             }
+
+            Spacer(modifier = Modifier.height(15.dp))
+
             AnimatedContent(
-                loginRegister,
+                targetState = loginRegister,
+                label = "LoginRegisterAnimation",
                 transitionSpec = {
                     val animationDuration = 300
+
                     slideInHorizontally(
-                        animationSpec = tween(animationDuration, animationDuration/2, easing = EaseIn),
-                        initialOffsetX = { if(loginRegister) -it else it }
+                        animationSpec = tween(
+                            animationDuration,
+                            animationDuration / 2,
+                            easing = EaseIn
+                        ),
+                        initialOffsetX = { if (loginRegister) -it else it }
                     ) + fadeIn(
-                        animationSpec = tween(animationDuration, animationDuration/2)
-                    ) togetherWith  slideOutHorizontally(
+                        animationSpec = tween(animationDuration, animationDuration / 2)
+                    ) togetherWith slideOutHorizontally(
                         animationSpec = tween(animationDuration, easing = EaseOut),
-                        targetOffsetX = { if(loginRegister) it else -it }
+                        targetOffsetX = { if (loginRegister) it else -it }
                     ) + fadeOut(
                         animationSpec = tween(animationDuration)
                     )
                 }
             ) { isRegister ->
-                if(isRegister){
-                    registerForm(onRegister)
-                }else{
-                    loginForm(onLogin)
+
+                if (isRegister) {
+                    RegisterForm(
+                        isLoading = isLoading,
+                        onRegister = { username, password, repeatPassword, inviteCode ->
+                            if (password != repeatPassword) {
+                                // Najlepiej obsłużyć to w ViewModelu, ale na szybko może być tutaj
+                                return@RegisterForm
+                            }
+
+                            viewModel.register(username, password, inviteCode)
+                        }
+                    )
+                } else {
+                    LoginForm(
+                        isLoading = isLoading,
+                        onLogin = { username, password ->
+                            viewModel.login(username, password)
+                        }
+                    )
                 }
+            }
+
+            if (errorMessage != null) {
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(text = errorMessage)
             }
         }
     }
@@ -92,17 +141,19 @@ fun LoginScreen(onLogin: () -> Unit, onRegister: () -> Unit){
 
 
 @Composable
-fun loginForm( onLogin: () -> Unit ){
+fun LoginForm(
+    isLoading: Boolean,
+    onLogin: (username: String, password: String) -> Unit
+) {
     var login by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordHidden by remember { mutableStateOf(true) }
+
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         OutlinedTextField(
             value = login,
             onValueChange = { login = it },
-            label = {
-                Text("Login")
-            },
+            label = { Text("Login") },
             singleLine = true
         )
 
@@ -111,19 +162,30 @@ fun loginForm( onLogin: () -> Unit ){
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = {
-                Text("Password")
-            },
+            label = { Text("Password") },
             singleLine = true,
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
-            visualTransformation = if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Password
+            ),
+            visualTransformation = if (passwordHidden) {
+                PasswordVisualTransformation()
+            } else {
+                VisualTransformation.None
+            },
             trailingIcon = {
-                val icon =
-                    if (passwordHidden) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility
+                val icon = if (passwordHidden) {
+                    Icons.Outlined.VisibilityOff
+                } else {
+                    Icons.Outlined.Visibility
+                }
+
                 IconButton(
                     onClick = { passwordHidden = !passwordHidden }
                 ) {
-                    Icon(imageVector = icon, contentDescription = "")
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null
+                    )
                 }
             }
         )
@@ -131,27 +193,36 @@ fun loginForm( onLogin: () -> Unit ){
         Spacer(modifier = Modifier.height(15.dp))
 
         Button(
-            onClick = onLogin
+            enabled = !isLoading,
+            onClick = {
+                onLogin(login, password)
+            }
         ) {
-            Text("Log In")
+            Text(if (isLoading) "Logging in..." else "Log In")
         }
     }
 }
-
 @Composable
-fun registerForm( onRegister: () -> Unit ){
+fun RegisterForm(
+    isLoading: Boolean,
+    onRegister: (
+        username: String,
+        password: String,
+        repeatPassword: String,
+        inviteCode: String
+    ) -> Unit
+) {
     var login by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var repeatPassword by remember { mutableStateOf("") }
     var inviteCode by remember { mutableStateOf("") }
     var passwordHidden by remember { mutableStateOf(true) }
+
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         OutlinedTextField(
             value = login,
             onValueChange = { login = it },
-            label = {
-                Text("Login")
-            },
+            label = { Text("Login") },
             singleLine = true
         )
 
@@ -160,19 +231,30 @@ fun registerForm( onRegister: () -> Unit ){
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = {
-                Text("Password")
-            },
+            label = { Text("Password") },
             singleLine = true,
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
-            visualTransformation = if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None,
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Password
+            ),
+            visualTransformation = if (passwordHidden) {
+                PasswordVisualTransformation()
+            } else {
+                VisualTransformation.None
+            },
             trailingIcon = {
-                val icon =
-                    if (passwordHidden) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility
+                val icon = if (passwordHidden) {
+                    Icons.Outlined.VisibilityOff
+                } else {
+                    Icons.Outlined.Visibility
+                }
+
                 IconButton(
                     onClick = { passwordHidden = !passwordHidden }
                 ) {
-                    Icon(imageVector = icon, contentDescription = "")
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null
+                    )
                 }
             }
         )
@@ -182,12 +264,16 @@ fun registerForm( onRegister: () -> Unit ){
         OutlinedTextField(
             value = repeatPassword,
             onValueChange = { repeatPassword = it },
-            label = {
-                Text("Repeat Password")
-            },
+            label = { Text("Repeat Password") },
             singleLine = true,
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
-            visualTransformation = if (passwordHidden) PasswordVisualTransformation() else VisualTransformation.None
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Password
+            ),
+            visualTransformation = if (passwordHidden) {
+                PasswordVisualTransformation()
+            } else {
+                VisualTransformation.None
+            }
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -195,18 +281,19 @@ fun registerForm( onRegister: () -> Unit ){
         OutlinedTextField(
             value = inviteCode,
             onValueChange = { inviteCode = it },
-            label = {
-                Text("Invite Code")
-            },
+            label = { Text("Invite Code") },
             singleLine = true
         )
 
         Spacer(modifier = Modifier.height(15.dp))
 
         Button(
-            onClick = onRegister
+            enabled = !isLoading,
+            onClick = {
+                onRegister(login, password, repeatPassword, inviteCode)
+            }
         ) {
-            Text("Register")
+            Text(if (isLoading) "Registering..." else "Register")
         }
     }
 }

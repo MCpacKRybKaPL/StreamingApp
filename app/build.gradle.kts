@@ -63,9 +63,14 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
-
-// Source: https://mvnrepository.com/artifact/androidx.security/security-crypto
+    implementation(libs.logging.interceptor)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.media3.exoplayer.hls)
+
+    runtimeOnly(libs.androidx.media3.exoplayer.hls)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -79,7 +84,5 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
-    implementation(libs.androidx.media3.exoplayer)
-    implementation(libs.androidx.media3.ui)
     implementation(libs.coil.compose)
 }

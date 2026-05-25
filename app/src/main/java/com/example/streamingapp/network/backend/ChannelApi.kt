@@ -1,6 +1,6 @@
-package com.example.testoweui.network.api.backend
+package com.example.streamingapp.network.backend
 
-import com.example.testoweui.model.response.LiveChannelsResponse
+import com.example.streamingapp.dataModels.response.LiveChannelsResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Header

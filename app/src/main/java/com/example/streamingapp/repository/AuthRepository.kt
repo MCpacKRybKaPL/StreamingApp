@@ -58,20 +58,28 @@ class AuthRepository(
         }
     }
 
-    suspend fun refreshToken(): Boolean{
+    suspend fun refreshToken(): Boolean {
         try {
-            val response = api.refreshToken(RefreshTokenRequest(tokenManager.getRefreshToken()));
+            val refreshToken = tokenManager.getRefreshToken() ?: return false
+
+            val response = api.refreshToken(
+                RefreshTokenRequest(refreshToken)
+            )
+
             val body = response.body()
+
             android.util.Log.d("AUTH", "Code: ${response.code()}")
             android.util.Log.d("AUTH", "Body: $body")
             android.util.Log.d("AUTH", "Error: ${response.errorBody()?.string()}")
+
             if (response.isSuccessful && body != null) {
                 tokenManager.saveAccessToken(body.accessToken)
                 tokenManager.saveRefreshToken(body.refreshToken)
                 return true
             }
+
             return false
-        }catch (e: Exception){
+        } catch (e: Exception) {
             return false
         }
     }
