@@ -144,7 +144,8 @@ fun StreamPreview(channel: ChannelsPublicResponse, navController: NavController)
             Column(modifier = Modifier.padding(10.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     AsyncImage(
-                        model = "https://freerangestock.com/sample/120147/business-man-profile-vector.jpg",
+//                        model = "https://freerangestock.com/sample/120147/business-man-profile-vector.jpg",
+                        model = "https://thispersondoesnotexist.com/",
                         contentDescription = "",
                         modifier = Modifier
                             .clip(CircleShape)
