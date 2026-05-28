@@ -6,23 +6,44 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.streamingapp.network.RetrofitClient
+import com.example.streamingapp.repository.AuthRepository
 import com.example.streamingapp.screens.LoginScreen
 import com.example.streamingapp.screens.StreamList
 import com.example.streamingapp.screens.StreamView
 import com.example.streamingapp.ui.theme.StreamingAppTheme
+import com.example.streamingapp.utils.TokenManager
+import com.example.streamingapp.viewmodel.AuthViewModel
+import com.example.streamingapp.viewmodel.AuthViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val tokenManager = TokenManager(applicationContext)
+
+        val authRepository = AuthRepository(
+            api = RetrofitClient.instance,
+            tokenManager = tokenManager
+        )
+
+        val authViewModelFactory = AuthViewModelFactory(authRepository)
+
         setContent {
             StreamingAppTheme {
                 val navController = rememberNavController()
+
+                val authViewModel: AuthViewModel = viewModel(
+                    factory = authViewModelFactory
+                )
+
                 NavHost(
                     navController = navController,
                     startDestination = "LoginRegister",
@@ -39,22 +60,32 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 ) {
-                    composable("LoginRegister",
-                    ) {
+                    composable("LoginRegister") {
                         LoginScreen(
-                            onLogin = {
-                                navController.navigate(route = "StreamList")
-                            },
-                            onRegister = {
-                                navController.navigate(route = "StreamList")
+                            viewModel = authViewModel,
+                            onLoginSuccess = {
+                                navController.navigate("StreamList") {
+                                    popUpTo("LoginRegister") {
+                                        inclusive = true
+                                    }
+                                }
                             }
                         )
                     }
-                    composable("StreamList") { StreamList(navController) }
+
+                    composable("StreamList") {
+                        StreamList(
+                            navController = navController,
+                            authViewModel = authViewModel
+                        )
+                    }
+
                     composable(
-                        "StreamView/{streamID}",
+                        route = "StreamView/{streamID}",
                         arguments = listOf(
-                            navArgument("streamID") { type = NavType.StringType }
+                            navArgument("streamID") {
+                                type = NavType.StringType
+                            }
                         )
                     ) { backStackEntry ->
                         val streamID = backStackEntry.arguments?.getString("streamID") ?: "0"
